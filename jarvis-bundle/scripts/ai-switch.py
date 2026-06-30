@@ -42,7 +42,6 @@ else:  # macOS and Linux
     STATE_FILE = os.path.expanduser(
         "~/.config/Code/User/ai-switch.state"
     )
-
 ENABLEMENT_KEY = "extensionsEnablement"
 
 # Extension IDs

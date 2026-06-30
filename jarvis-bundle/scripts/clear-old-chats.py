@@ -28,7 +28,6 @@ else:  # macOS and Linux
     DB_PATH = os.path.expanduser(
         "~/.config/Code/User/globalStorage/state.vscdb"
     )
-
 CHAT_INDEX_KEY = "chat.ChatSessionStore.index"
 
 

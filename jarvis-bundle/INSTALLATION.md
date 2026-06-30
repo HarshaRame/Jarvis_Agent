@@ -1,327 +1,287 @@
-# Installation Guide — Jarvis Agent Bundle
+# Jarvis Agent Bundle — Installation Guide
 
-Choose your operating system below for step-by-step installation instructions.
+Complete installation instructions for Windows, macOS, and Linux systems.
 
 ---
 
-## macOS Installation
+## ⚙️ Prerequisites
 
-### Step 1: Locate Your VS Code User Data Directory
+1. **VS Code** installed with **GitHub Copilot** extension enabled
+2. **Python 3.8+** (only needed if you plan to use utility scripts)
+3. **Admin/sudo privileges** (for copying files to system directories on macOS/Linux)
 
-```bash
-open ~/.config/Code/User
+---
+
+## 📥 Installation on Windows
+
+### Step 1: Locate Your VS Code User Data Folder
+
+Open PowerShell and run:
+```powershell
+echo $env:APPDATA\Code\User
 ```
 
-If the directory doesn't exist, create it:
+This is typically: `C:\Users\<YourUsername>\AppData\Roaming\Code\User\`
 
-```bash
-mkdir -p ~/.config/Code/User
+### Step 2: Copy Agent Files
+
+Copy all `.agent.md` files from the bundle's `agents/` folder:
+```powershell
+Copy-Item .\agents\*.agent.md -Destination "$env:APPDATA\Code\User\prompts\" -Force
 ```
 
-### Step 2: Copy Bundle Files
+### Step 3: Copy Skills
 
-1. **Extract the bundle** to your Downloads folder (or preferred location).
+Copy the entire `skills/` folder contents:
+```powershell
+# Create skills directory structure if it doesn't exist
+New-Item -ItemType Directory -Path "$env:USERPROFILE\.agents\skills" -Force -ErrorAction SilentlyContinue
 
-2. **Copy agent files** to VS Code agents folder:
-
-```bash
-# Create the agents directory if it doesn't exist
-mkdir -p ~/.config/Code/User/prompts
-
-# Copy agent files
-cp jarvis-bundle/agents/*.agent.md ~/.config/Code/User/prompts/
+# Copy each skill folder
+Copy-Item .\skills\* -Destination "$env:USERPROFILE\.agents\skills\" -Recurse -Force
 ```
 
-3. **Copy skills** to VS Code skills folder:
+### Step 4: Copy Scripts
+
+Create the scripts directory and copy Python scripts:
+```powershell
+New-Item -ItemType Directory -Path "$env:APPDATA\Code\User\prompts\scripts" -Force -ErrorAction SilentlyContinue
+Copy-Item .\scripts\*.py -Destination "$env:APPDATA\Code\User\prompts\scripts\" -Force
+```
+
+### Step 5: Copy Instructions
+
+Copy the instructions file:
+```powershell
+New-Item -ItemType Directory -Path "$env:APPDATA\Code\User\prompts\instructions" -Force -ErrorAction SilentlyContinue
+Copy-Item .\instructions\general.instructions.md -Destination "$env:APPDATA\Code\User\prompts\instructions\" -Force
+```
+
+### Step 6: Reload VS Code
+
+1. Press `Ctrl+Shift+P`
+2. Type: **Reload Window**
+3. Press Enter
+
+---
+
+## 📥 Installation on macOS / Linux
+
+### Step 1: Locate Your VS Code User Data Folder
+
+Open Terminal and run:
+```bash
+echo ~/.config/Code/User/
+```
+
+This is typically: `/Users/<YourUsername>/.config/Code/User/` (macOS) or `/home/<YourUsername>/.config/Code/User/` (Linux)
+
+### Step 2: Copy Agent Files
 
 ```bash
-# Create the skills directory
-mkdir -p ~/.config/Code/User/.agents/skills
+cp ./agents/*.agent.md ~/.config/Code/User/prompts/
+```
+
+### Step 3: Copy Skills
+
+```bash
+# Create skills directory if it doesn't exist
+mkdir -p ~/.agents/skills
 
 # Copy all skill folders
-cp -r jarvis-bundle/skills/* ~/.config/Code/User/.agents/skills/
+cp -r ./skills/* ~/.agents/skills/
 ```
 
-4. **Copy instructions**:
+### Step 4: Copy Scripts
 
 ```bash
-# Create the instructions directory
-mkdir -p ~/.config/Code/User/prompts/instructions
-
-# Copy instruction files
-cp jarvis-bundle/instructions/*.instructions.md ~/.config/Code/User/prompts/instructions/
-```
-
-5. **Copy scripts**:
-
-```bash
-# Create the scripts directory
+# Create scripts directory if it doesn't exist
 mkdir -p ~/.config/Code/User/prompts/scripts
 
-# Copy scripts
-cp jarvis-bundle/scripts/*.py ~/.config/Code/User/prompts/scripts/
+# Copy Python scripts
+cp ./scripts/*.py ~/.config/Code/User/prompts/scripts/
 
 # Make scripts executable
 chmod +x ~/.config/Code/User/prompts/scripts/*.py
 ```
 
-### Step 3: Update Script Paths (macOS)
+### Step 5: Copy Instructions
 
-The scripts reference hardcoded Windows paths. Update them for macOS:
-
-1. **Edit `~/.config/Code/User/prompts/scripts/clear-old-chats.py`**:
-
-   Find this line (around line 18):
-   ```python
-   DB_PATH = os.path.join(
-       os.environ["APPDATA"],
-       "Code", "User", "globalStorage", "state.vscdb"
-   )
-   ```
-
-   Replace with:
-   ```python
-   DB_PATH = os.path.expanduser(
-       "~/.config/Code/User/globalStorage/state.vscdb"
-   )
-   ```
-
-2. **Edit `~/.config/Code/User/prompts/scripts/ai-switch.py`**:
-
-   Find these lines (around lines 24-31):
-   ```python
-   DB_PATH = os.path.join(
-       os.environ["APPDATA"],
-       "Code", "User", "globalStorage", "state.vscdb"
-   )
-   STATE_FILE = os.path.join(
-       os.environ["APPDATA"],
-       "Code", "User", "ai-switch.state"
-   )
-   ```
-
-   Replace with:
-   ```python
-   DB_PATH = os.path.expanduser(
-       "~/.config/Code/User/globalStorage/state.vscdb"
-   )
-   STATE_FILE = os.path.expanduser(
-       "~/.config/Code/User/ai-switch.state"
-   )
-   ```
-
-### Step 4: Update Agent Script References
-
-Update any agent files that reference hardcoded script paths. 
-
-For example, in `~/.config/Code/User/prompts/Jarvis-clearchats.agent.md`, find:
-```xml
-<script>
-C:\Users\hkr1\AppData\Roaming\Code\User\prompts\scripts\clear-old-chats.py
-</script>
-```
-
-Replace with:
-```xml
-<script>
-~/.config/Code/User/prompts/scripts/clear-old-chats.py
-</script>
-```
-
-Do the same for `AISwitch.agent.md`.
-
-### Step 5: Verify Installation
-
-1. **Reload VS Code**:
-   ```
-   Cmd+Shift+P → Reload Window
-   ```
-
-2. **Open Command Palette**:
-   ```
-   Cmd+Shift+P → type "@jarvis"
-   ```
-
-   You should see all Jarvis agents listed.
-
-### Step 6: Test Jarvis
-
-Open a chat in VS Code and try:
-
-```
-@Jarvis test the following file for bugs: [paste a file path]
-```
-
----
-
-## Windows Installation
-
-### Step 1: Locate Your VS Code User Data Directory
-
-1. Open File Explorer.
-2. Navigate to: `C:\Users\<YourUsername>\AppData\Roaming\Code\User`
-
-   (If AppData is hidden, enable "Show hidden files" in View options)
-
-### Step 2: Copy Bundle Files
-
-1. **Extract the bundle** to your Downloads folder (or preferred location).
-
-2. **Copy agent files**:
-
-   - Create folder: `C:\Users\<YourUsername>\AppData\Roaming\Code\User\prompts`
-   - Copy all `.agent.md` files from `jarvis-bundle\agents\` into this folder.
-
-3. **Copy skills**:
-
-   - Create folder: `C:\Users\<YourUsername>\.agents\skills`
-   - Copy all folders from `jarvis-bundle\skills\` into this folder.
-
-4. **Copy instructions**:
-
-   - Create folder: `C:\Users\<YourUsername>\AppData\Roaming\Code\User\prompts\instructions`
-   - Copy `.instructions.md` files from `jarvis-bundle\instructions\` into this folder.
-
-5. **Copy scripts**:
-
-   - Create folder: `C:\Users\<YourUsername>\AppData\Roaming\Code\User\prompts\scripts`
-   - Copy `.py` files from `jarvis-bundle\scripts\` into this folder.
-
-### Step 3: Update Skill File Paths
-
-If you installed to a location different from the default, update the path references in skill folders.
-
-For example, in skill SKILL.md files that reference scripts or configs, update any hardcoded paths to match your installation location.
-
-### Step 4: Verify Installation
-
-1. **Reload VS Code**:
-   ```
-   Ctrl+Shift+P → Reload Window
-   ```
-
-2. **Open Command Palette**:
-   ```
-   Ctrl+Shift+P → type "@jarvis"
-   ```
-
-   You should see all Jarvis agents listed.
-
-### Step 5: Test Jarvis
-
-Open a chat in VS Code and try:
-
-```
-@Jarvis test the following file for bugs: [paste a file path]
-```
-
----
-
-## Verify All Components Are Working
-
-After installation, check each component:
-
-### 1. Agents
-
-In VS Code chat, try:
-
-```
-@Jarvis-test audit this file: [path]
-@Jarvis-develop implement a new feature
-@Jarvis-docs write a README
-@Jarvis-clearchats clear old chats
-```
-
-### 2. Skills
-
-In VS Code chat, try:
-
-```
-@Jarvis /caveman mode on
-(responds in caveman speech)
-
-@Jarvis /caveman mode off
-(resumes normal speech)
-```
-
-### 3. Scripts
-
-Open terminal and test:
-
-**macOS:**
 ```bash
-python ~/.config/Code/User/prompts/scripts/ai-switch.py status
-python ~/.config/Code/User/prompts/scripts/clear-old-chats.py --dry-run
+# Create instructions directory if it doesn't exist
+mkdir -p ~/.config/Code/User/prompts/instructions
+
+# Copy instructions file
+cp ./instructions/general.instructions.md ~/.config/Code/User/prompts/instructions/
 ```
 
-**Windows (PowerShell):**
-```powershell
-python "C:\Users\<YourUsername>\AppData\Roaming\Code\User\prompts\scripts\ai-switch.py" status
-python "C:\Users\<YourUsername>\AppData\Roaming\Code\User\prompts\scripts\clear-old-chats.py" --dry-run
-```
+### Step 6: Reload VS Code
+
+1. Press `Cmd+Shift+P` (macOS) or `Ctrl+Shift+P` (Linux)
+2. Type: **Reload Window**
+3. Press Enter
 
 ---
 
-## Troubleshooting
+## ✅ Verify Installation
 
-### Agents Don't Appear
+After reloading VS Code:
 
-**Issue**: Agents not showing when you type `@jarvis`
+1. Open a **Copilot Chat** panel
+2. Type `@Jarvis` — you should see Jarvis appear in the autocomplete suggestions
+3. Type `@Jarvis status` to verify the agent is responding
 
-**Solution**:
-1. Ensure files are in the correct directory
-2. Reload VS Code: `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows) → `Reload Window`
-3. Verify file extensions are `.agent.md` (not `.md` or `.txt`)
+You should also see these agents available:
+- `@Jarvis-develop`
+- `@Jarvis-test`
+- `@Jarvis-docs`
+- `@Jarvis-clearchats`
+- `@AISwitch`
 
-### Scripts Fail to Run
+---
 
-**Issue**: "Python not found" or "Permission denied"
+## 🧪 Test the Scripts
 
-**Solution**:
-1. **Verify Python is installed**: 
+### Test clear-old-chats.py
+
+**Windows:**
+```powershell
+python "$env:APPDATA\Code\User\prompts\scripts\clear-old-chats.py" --help
+```
+
+**macOS/Linux:**
+```bash
+python3 ~/.config/Code/User/prompts/scripts/clear-old-chats.py --help
+```
+
+You should see usage instructions.
+
+### Test ai-switch.py
+
+**Windows:**
+```powershell
+python "$env:APPDATA\Code\User\prompts\scripts\ai-switch.py" status
+```
+
+**macOS/Linux:**
+```bash
+python3 ~/.config/Code/User/prompts/scripts/ai-switch.py status
+```
+
+You should see which AI assistant is currently active.
+
+---
+
+## 🔧 Troubleshooting
+
+### Agents Don't Appear in Copilot Chat
+
+1. Verify files copied to correct location:
+   - Windows: `%APPDATA%\Code\User\prompts\`
+   - macOS/Linux: `~/.config/Code/User/prompts/`
+
+2. Check file extensions are `.agent.md` (not `.agent.md.txt`)
+
+3. Reload VS Code window again
+
+4. Check VS Code Developer Console for errors:
+   - Press `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Option+I` (macOS)
+   - Look for errors in the Console tab
+
+### Scripts Don't Run
+
+1. Verify Python is installed:
    ```bash
    python --version  # or python3 --version
    ```
-2. **macOS — Make scripts executable**:
+
+2. Check script permissions (macOS/Linux):
    ```bash
    chmod +x ~/.config/Code/User/prompts/scripts/*.py
    ```
-3. **Windows — Run Python explicitly**:
-   ```powershell
-   python "C:\path\to\script.py"
+
+3. Use full path to Python if needed:
+   ```bash
+   /usr/bin/python3 <script-path>
    ```
 
-### Database Locked Error
+### Skills Not Loading
 
-**Issue**: Script says "database is locked"
+1. Verify skills copied to:
+   - Windows: `%USERPROFILE%\.agents\skills\`
+   - macOS/Linux: `~/.agents/skills/`
 
-**Solution**: Close VS Code completely before running scripts that modify the chat database.
+2. Each skill should be in its own subfolder with a `SKILL.md` file
 
-### Import Errors in Scripts
+3. Reload VS Code
 
-**Issue**: Script fails with "No module named sqlite3"
+---
 
-**Solution**: This shouldn't happen with Python 3.8+. If it does:
+## 🔄 Updating
 
-**macOS:**
-```bash
-python3 -m pip install pysqlite3
-```
+To update Jarvis agents or skills:
 
-**Windows**:
+1. Extract the new bundle
+2. Repeat the installation steps (files will be overwritten)
+3. Reload VS Code
+
+---
+
+## 🗑️ Uninstallation
+
+### Windows
+
 ```powershell
-python -m pip install pysqlite3
+# Remove agents
+Remove-Item "$env:APPDATA\Code\User\prompts\Jarvis*.agent.md"
+Remove-Item "$env:APPDATA\Code\User\prompts\AISwitch.agent.md"
+
+# Remove skills
+Remove-Item "$env:USERPROFILE\.agents\skills\jarvis-*" -Recurse
+Remove-Item "$env:USERPROFILE\.agents\skills\caveman*" -Recurse
+Remove-Item "$env:USERPROFILE\.agents\skills\compress" -Recurse
+Remove-Item "$env:USERPROFILE\.agents\skills\find-skills" -Recurse
+
+# Remove scripts
+Remove-Item "$env:APPDATA\Code\User\prompts\scripts\clear-old-chats.py"
+Remove-Item "$env:APPDATA\Code\User\prompts\scripts\ai-switch.py"
+
+# Remove instructions
+Remove-Item "$env:APPDATA\Code\User\prompts\instructions\general.instructions.md"
 ```
 
+### macOS / Linux
+
+```bash
+# Remove agents
+rm ~/.config/Code/User/prompts/Jarvis*.agent.md
+rm ~/.config/Code/User/prompts/AISwitch.agent.md
+
+# Remove skills
+rm -rf ~/.agents/skills/jarvis-*
+rm -rf ~/.agents/skills/caveman*
+rm -rf ~/.agents/skills/compress
+rm -rf ~/.agents/skills/find-skills
+
+# Remove scripts
+rm ~/.config/Code/User/prompts/scripts/clear-old-chats.py
+rm ~/.config/Code/User/prompts/scripts/ai-switch.py
+
+# Remove instructions
+rm ~/.config/Code/User/prompts/instructions/general.instructions.md
+```
+
+Then reload VS Code.
+
 ---
 
-## Next Steps
+## 📞 Support
 
-1. Read the [README.md](README.md) for an overview of all agents and skills.
-2. Start using Jarvis in your VS Code chat with `@Jarvis` followed by your request.
-3. For detailed documentation on each agent, read the corresponding `.agent.md` file.
-4. For skill documentation, read each skill's `SKILL.md` file.
+For issues or questions:
+- Review agent `.agent.md` files for inline documentation
+- Check skill `SKILL.md` files for workflow details
+- Consult VS Code Copilot documentation
 
 ---
 
-**Questions?** Check the README.md or the documentation embedded in each agent/skill file.
+**Installation complete!** Start using Jarvis with `@Jarvis` in Copilot Chat.
